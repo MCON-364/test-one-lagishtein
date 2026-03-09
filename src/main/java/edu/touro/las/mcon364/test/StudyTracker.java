@@ -1,5 +1,6 @@
 package edu.touro.las.mcon364.test;
 
+import javax.swing.text.html.Option;
 import java.util.*;
 
 public class StudyTracker {
@@ -25,7 +26,15 @@ public class StudyTracker {
      * Throw IllegalArgumentException if name is null or blank.
      */
     public boolean addLearner(String name) {
-        throw new UnsupportedOperationException();
+        if (name == null || name.isBlank()){
+            throw new IllegalArgumentException("Name cannot be null or blank");
+        }
+        var scoresFor = scoresFor(name);
+        if (scoresFor.isEmpty()){
+            scoresByLearner.put(name, new ArrayList<>());
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -42,7 +51,16 @@ public class StudyTracker {
      * This operation should be undoable.
      */
     public boolean addScore(String name, int score) {
-        throw new UnsupportedOperationException();
+        if (score < 0 || score > 100){
+            throw new IllegalArgumentException("Score has to be a value between 0 and 0");
+        }
+        var scoresFor = scoresFor(name);
+        return scoresFor.map(scores -> {
+            scores.add(score);
+            undoStack.push(() -> scores.remove(scores.size() - 1));
+            return true;
+            }
+        ).orElse(false);
     }
 
     /**
@@ -54,7 +72,13 @@ public class StudyTracker {
      * - the learner has no scores
      */
     public Optional<Double> averageFor(String name) {
-        throw new UnsupportedOperationException();
+        try {
+            double average = scoresFor(name).map(scores ->
+                    scores.stream().mapToInt(Integer::intValue).average().orElseThrow()).orElseThrow();
+            return Optional.of(average);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -70,7 +94,22 @@ public class StudyTracker {
      * Return Optional.empty() when no average exists.
      */
     public Optional<String> letterBandFor(String name) {
-        throw new UnsupportedOperationException();
+        var averageOptional = averageFor(name);
+        return averageOptional.map(
+                average-> {
+                    var firstDigit = (int)(average/10);
+                    var grade = switch (firstDigit){
+                        case 9,10 -> "A";
+                        case 8 -> "B";
+                        case 7 -> "C";
+                        case 6 -> "D";
+                        default -> {
+                            yield "F";
+                        }
+                    };
+                    return Optional.of(grade);
+                }
+        ).orElse(Optional.empty());
     }
 
     /**
@@ -81,7 +120,17 @@ public class StudyTracker {
      * Return false if there is nothing to undo.
      */
     public boolean undoLastChange() {
-        throw new UnsupportedOperationException();
+        if (undoStack.isEmpty()) {
+            return false;
+        }
+        var action = undoStack.pop();
+        try {
+            action.undo();
+            return true;
+        }
+        catch (Exception e) {
+            return false;
+        }
     }
 
 

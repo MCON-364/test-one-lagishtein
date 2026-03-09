@@ -1,7 +1,9 @@
 package edu.touro.las.mcon364.test;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -13,7 +15,7 @@ public class FunctionalWarmup {
      * Return a Supplier that gives the current month number (1-12).
      */
     public static Supplier<Integer> currentMonthSupplier() {
-        throw new UnsupportedOperationException();
+        return () -> LocalDate.now().getMonth().getValue();
     }
 
     /**
@@ -22,7 +24,7 @@ public class FunctionalWarmup {
      * has more than 5 characters.
      */
     public static Predicate<String> longerThanFive() {
-        throw new UnsupportedOperationException();
+        return s -> s.length() > 5;
     }
 
     /**
@@ -34,7 +36,9 @@ public class FunctionalWarmup {
      * Prefer chaining smaller predicates.
      */
     public static Predicate<Integer> positiveAndEven() {
-        throw new UnsupportedOperationException();
+        Predicate<Integer> isPositive = n -> n > 0;
+        Predicate<Integer> isEven = n -> n % 2 == 0;
+        return isPositive.and(isEven);
     }
 
     /**
@@ -48,7 +52,7 @@ public class FunctionalWarmup {
      *
      */
     public static Function<String, Integer> wordCounter() {
-        throw new UnsupportedOperationException();
+        return s -> s.trim().isEmpty() ? 0: s.trim().split("\\s+").length;
     }
 
     /**
@@ -63,6 +67,6 @@ public class FunctionalWarmup {
      * ["  math ", "", " java", "  "] -> ["MATH", "JAVA"]
      */
     public static List<String> cleanLabels(List<String> labels) {
-        throw new UnsupportedOperationException();
+        return labels.stream().map(String::trim).filter(s -> s.length() > 0).map(String::toUpperCase).toList();
     }
 }
